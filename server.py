@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mcp.server.fastmcp import FastMCP
 from manager import Manager
 from typing import Any
@@ -300,7 +302,119 @@ def get_scheduled_posts() -> dict[str, Any]:
 
 
 @mcp.tool()
-def get_page_info() -> dict[str, Any]:
+def get_page_info(page_id: str | None = None, page_name: str | None = None) -> dict[str, Any]:
     """Get extended information about the Facebook Page."""
-    return manager.get_page_info()
+    return manager.get_page_info(page_id, page_name)
 
+
+@mcp.tool()
+def list_publishable_pages() -> list[dict[str, Any]]:
+    """List Facebook Pages available in the local token registry without exposing tokens."""
+    return manager.list_publishable_pages()
+
+
+@mcp.tool()
+def draft_facebook_post(
+    topic: str,
+    source_notes: str,
+    audience: str = "AI technology followers in Taiwan",
+    goal: str = "explain why this matters and drive thoughtful engagement",
+    style_override: str = "",
+    call_to_action: str = "你怎麼看？歡迎留言討論。",
+) -> dict[str, Any]:
+    """Create a local Facebook post draft in the configured writing style without publishing it."""
+    return manager.draft_facebook_post(topic, source_notes, audience, goal, style_override, call_to_action)
+
+
+@mcp.tool()
+def draft_image_post(
+    topic: str,
+    image_url: str,
+    source_notes: str,
+    audience: str = "AI technology followers in Taiwan",
+    goal: str = "explain the visual and drive engagement",
+    style_override: str = "",
+    call_to_action: str = "你會怎麼應用這個趨勢？",
+) -> dict[str, Any]:
+    """Create a local image post draft without publishing it."""
+    return manager.draft_image_post(topic, image_url, source_notes, audience, goal, style_override, call_to_action)
+
+
+@mcp.tool()
+def list_post_drafts(status: str | None = None) -> list[dict[str, Any]]:
+    """List local post drafts, optionally filtered by status."""
+    return manager.list_post_drafts(status)
+
+
+@mcp.tool()
+def get_post_draft(draft_id: str) -> dict[str, Any]:
+    """Get a single local post draft."""
+    return manager.get_post_draft(draft_id)
+
+
+@mcp.tool()
+def set_draft_target_page(
+    draft_id: str,
+    target_page_id: str | None = None,
+    target_page_name: str | None = None,
+) -> dict[str, Any]:
+    """Set which Facebook Page a local draft should publish to."""
+    return manager.set_draft_target_page(draft_id, target_page_id, target_page_name)
+
+
+@mcp.tool()
+def approve_post_draft(draft_id: str, approval_token: str) -> dict[str, Any]:
+    """Mark a local draft as approved after human review."""
+    return manager.approve_post_draft(draft_id, approval_token)
+
+
+@mcp.tool()
+def publish_approved_post(
+    draft_id: str,
+    approval_token: str,
+    target_page_id: str | None = None,
+    target_page_name: str | None = None,
+) -> dict[str, Any]:
+    """Publish an approved local draft to Facebook."""
+    return manager.publish_approved_post(draft_id, approval_token, target_page_id, target_page_name)
+
+
+@mcp.tool()
+def schedule_approved_post(
+    draft_id: str,
+    publish_time: int,
+    approval_token: str,
+    target_page_id: str | None = None,
+    target_page_name: str | None = None,
+) -> dict[str, Any]:
+    """Schedule an approved local text draft for future Facebook publication."""
+    return manager.schedule_approved_post(draft_id, publish_time, approval_token, target_page_id, target_page_name)
+
+
+@mcp.tool()
+def upload_image_for_review(
+    image_url: str,
+    caption: str = "",
+    target_page_id: str | None = None,
+    target_page_name: str | None = None,
+) -> dict[str, Any]:
+    """Upload a photo to the Page as unpublished media for review."""
+    return manager.upload_image_for_review(image_url, caption, target_page_id, target_page_name)
+
+
+@mcp.tool()
+def list_recent_posts(limit: int = 10, target_page_id: str | None = None, target_page_name: str | None = None) -> dict[str, Any]:
+    """List recent Facebook posts with message previews and permalinks."""
+    return manager.list_recent_posts(limit, target_page_id, target_page_name)
+
+
+@mcp.tool()
+def check_topic_overlap(topic: str, limit: int = 20) -> dict[str, Any]:
+    """Check whether a planned topic overlaps with recent Page posts."""
+    return manager.check_topic_overlap(topic, limit)
+
+
+@mcp.tool()
+def analyze_recent_post_performance(limit: int = 10) -> dict[str, Any]:
+    """Analyze recent post engagement and store a local performance snapshot."""
+    return manager.analyze_recent_post_performance(limit)

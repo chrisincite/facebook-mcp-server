@@ -59,6 +59,18 @@ This MCP provides a suite of AI-callable tools that connect directly to a Facebo
 | `get_post_permalink`             | Get the permalink URL of a post.                            |
 | `get_scheduled_posts`            | List all scheduled (unpublished) posts on the Page.         |
 | `get_page_info`                  | Get extended Page details (name, about, category, website). |
+| `draft_facebook_post`            | Create a local post draft in your configured writing style. |
+| `draft_image_post`               | Create a local image post draft for review.                 |
+| `list_post_drafts`               | List local drafts by status.                                |
+| `approve_post_draft`             | Mark a draft as approved after human review.                |
+| `publish_approved_post`          | Publish an approved draft to Facebook.                      |
+| `schedule_approved_post`         | Schedule an approved text draft.                            |
+| `upload_image_for_review`        | Upload unpublished image media for review.                  |
+| `list_recent_posts`              | Retrieve recent posts for planning.                         |
+| `check_topic_overlap`            | Compare a planned topic with recent posts.                  |
+| `analyze_recent_post_performance`| Analyze recent engagement and store a local snapshot.       |
+| `list_publishable_pages`         | List locally configured Pages without exposing tokens.      |
+| `set_draft_target_page`          | Choose which Page a draft should publish to.                |
 
 ---
 
@@ -92,7 +104,54 @@ You can obtain these from  https://developers.facebook.com/tools/explorer
 ```bash
 FACEBOOK_ACCESS_TOKEN=your_facebook_page_access_token
 FACEBOOK_PAGE_ID=your_page_id
+FACEBOOK_APPROVAL_TOKEN=choose_a_local_human_approval_secret
+FACEBOOK_TOKEN_FILE=/Users/chrishsu/.env/.fbtoken
+FACEBOOK_TOKEN_JSON_FILE=/Users/chrishsu/.env/fbtoken.json
+CONTENT_STORE_PATH=content_store.json
+DEFAULT_POST_STYLE="Write in Traditional Chinese for an AI technology audience in Taiwan. Use a direct, analytical tone, start with a concrete hook, explain why it matters, add practical implications, and end with a clear takeaway."
 ```
+
+`FACEBOOK_TOKEN_FILE` can point to either a normal dotenv file or a file containing only the raw Facebook access token. The default path is `/Users/chrishsu/.env/.fbtoken`.
+
+`FACEBOOK_TOKEN_JSON_FILE` can point to a Graph API `/me/accounts?fields=id,name,tasks,access_token` response. Tokens from this file stay internal; MCP tools only expose Page IDs, names, tasks, and publishability.
+
+## 🧑‍💼 Custom Creator Workflow
+
+This fork adds a safer creator workflow for running a Facebook Page with an AI agent.
+
+Recommended flow:
+
+```text
+draft_facebook_post
+  -> list_publishable_pages
+  -> set_draft_target_page
+  -> list_post_drafts / get_post_draft
+  -> approve_post_draft
+  -> publish_approved_post or schedule_approved_post
+```
+
+The publish and schedule tools require `FACEBOOK_APPROVAL_TOKEN`. This keeps AI-assisted drafting separate from real Facebook publishing.
+
+For image posts:
+
+```text
+draft_image_post
+  -> review draft and image URL
+  -> approve_post_draft
+  -> publish_approved_post
+```
+
+For planning and analytics:
+
+```text
+check_topic_overlap
+  -> avoid repeating recent topics
+
+analyze_recent_post_performance
+  -> rank recent posts by comments, shares, likes, and reactions
+```
+
+Local drafts and performance snapshots are stored in `CONTENT_STORE_PATH`. The default `content_store.json` is ignored by git because it may contain unpublished content.
 
 ## 🧩 Using with Claude Desktop
 To set up the FacebookMCP in Clade:
