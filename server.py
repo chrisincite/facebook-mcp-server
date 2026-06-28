@@ -418,3 +418,7 @@ def check_topic_overlap(topic: str, limit: int = 20) -> dict[str, Any]:
 def analyze_recent_post_performance(limit: int = 10) -> dict[str, Any]:
     """Analyze recent post engagement and store a local performance snapshot."""
     return manager.analyze_recent_post_performance(limit)
+
+
+if __name__ == "__main__":
+    mcp.run()
