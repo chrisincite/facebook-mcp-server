@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 from facebook_api import FacebookAPI
+from instagram_api import InstagramAPI
 from config import CONTENT_STORE_PATH, DEFAULT_POST_STYLE, FACEBOOK_APPROVAL_TOKEN, FACEBOOK_TOKEN_JSON_FILE, PAGE_ACCESS_TOKEN, PAGE_ID
 from content_store import ContentStore
 from page_registry import PageRegistry
@@ -10,6 +11,7 @@ from page_registry import PageRegistry
 class Manager:
     def __init__(self):
         self.api = FacebookAPI()
+        self.ig = InstagramAPI()
         self.store = ContentStore(CONTENT_STORE_PATH)
         self.pages = PageRegistry(FACEBOOK_TOKEN_JSON_FILE)
 
@@ -439,6 +441,32 @@ class Manager:
             }
         )
         return snapshot
+
+    # --- Instagram (graph.instagram.com, single configured account) ----------
+    def get_instagram_account(self) -> dict[str, Any]:
+        """Return info + publishing quota for the configured Instagram account."""
+        info = self.ig.get_account_info()
+        if "error" in info:
+            return info
+        limit = self.ig.get_content_publishing_limit()
+        if "error" not in limit:
+            info["content_publishing_limit"] = limit.get("data")
+        return info
+
+    def post_image_to_instagram(self, image_url: str, caption: str, approval_token: str) -> dict[str, Any]:
+        if not self._approval_token_matches(approval_token):
+            return {"error": "Invalid approval token"}
+        return self.ig.post_image(image_url, caption)
+
+    def post_carousel_to_instagram(self, image_urls: list[str], caption: str, approval_token: str) -> dict[str, Any]:
+        if not self._approval_token_matches(approval_token):
+            return {"error": "Invalid approval token"}
+        return self.ig.post_carousel(image_urls, caption)
+
+    def post_reel_to_instagram(self, video_url: str, caption: str, approval_token: str, cover_url: str | None = None) -> dict[str, Any]:
+        if not self._approval_token_matches(approval_token):
+            return {"error": "Invalid approval token"}
+        return self.ig.post_reel(video_url, caption, cover_url=cover_url)
 
     def _compose_post(
         self,

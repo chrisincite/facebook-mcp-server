@@ -420,5 +420,38 @@ def analyze_recent_post_performance(limit: int = 10) -> dict[str, Any]:
     return manager.analyze_recent_post_performance(limit)
 
 
+@mcp.tool()
+def get_instagram_account() -> dict[str, Any]:
+    """Get the configured Instagram account's profile and 24h publishing quota.
+    Input: None
+    Output: dict with user_id, username, account_type, media_count, followers_count, and quota usage.
+    """
+    return manager.get_instagram_account()
+
+@mcp.tool()
+def post_image_to_instagram(image_url: str, caption: str, approval_token: str) -> dict[str, Any]:
+    """Publish a single image to the configured Instagram account.
+    Input: image_url (publicly reachable URL), caption, approval_token.
+    Output: dict with the published Instagram media id, or an error.
+    """
+    return manager.post_image_to_instagram(image_url, caption, approval_token)
+
+@mcp.tool()
+def post_carousel_to_instagram(image_urls: list[str], caption: str, approval_token: str) -> dict[str, Any]:
+    """Publish a carousel (2-10 images) to the configured Instagram account.
+    Input: image_urls (list of publicly reachable URLs), caption, approval_token.
+    Output: dict with the published Instagram media id, or an error.
+    """
+    return manager.post_carousel_to_instagram(image_urls, caption, approval_token)
+
+@mcp.tool()
+def post_reel_to_instagram(video_url: str, caption: str, approval_token: str, cover_url: str | None = None) -> dict[str, Any]:
+    """Publish a Reel (video) to the configured Instagram account.
+    Input: video_url (publicly reachable URL), caption, approval_token, optional cover_url.
+    Output: dict with the published Instagram media id, or an error.
+    """
+    return manager.post_reel_to_instagram(video_url, caption, approval_token, cover_url)
+
+
 if __name__ == "__main__":
     mcp.run()
